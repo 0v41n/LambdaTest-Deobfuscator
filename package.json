@@ -1,0 +1,11 @@
+{
+  "name": "lambdatest-deobfuscator",
+  "version": "1.0.0",
+  "description": "Static deobfuscator for LambdaTest's JavaScript obfuscator. Just for fun :3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Yvain Ramora",
+  "license": "MIT"
+}
