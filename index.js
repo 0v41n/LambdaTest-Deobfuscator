@@ -1,3 +1,99 @@
+const fs = require("fs");
+const process = require("process");
+const argv = require('minimist')(process.argv.slice(2));
+const chalk = require('chalk');
+const highlight = require('cli-highlight').highlight;
+
+const help = `
+Usage:
+    -h                Display the help menu
+    -i <filename>     Specify the input file
+    -o <filename>     Specify the output file
+    -v                Enable verbose mode
+    -l                Display software licensing information
+    --no-colors       Disable colorized output
+
+
+Example:
+    node ${process.argv[1].split('\\').at(-1)} -i input.js -o output.js -v
+`;
+
+const theme = {
+    keyword: chalk.hex('#569CD6'),
+    built_in: chalk.hex('#50B9FE'),
+    string: chalk.hex('#C3602D'),
+    number: chalk.hex('#B5AD61'),
+    literal: chalk.hex('#569CD6'),
+    function: chalk.hex('#C5C800'),
+    params: chalk.hex('#9CDCF0').italic,
+    title: chalk.hex('#DCDCAA'),
+    comment: chalk.hex('#5E993E').italic,
+};
+
+if (argv.h) {
+    console.log(help);
+} else if (argv.l) {
+    console.log(fs.readFileSync('LICENSE', 'utf-8'));
+} else if (argv.i) {
+    if (fs.existsSync(argv.i)) {
+        deobfuscate(argv.i);
+    } else {
+        console.error('You must provide a valid input file.');
+    }
+} else {
+    console.error('Please specify arguments, use -h for help');
+}
+
+function deobfuscate(file) {
+    fs.readFile(file, "utf8", (err, data) => {
+        if (err) {
+            console.error("Error reading file:", err);
+            return;
+        }
+
+        /* A simple regular expression to retrieve the values ​​as parameters of the decoding function */
+        var parameters = data.match(/\s*"[0-9A-Z+/]+"\s*,\s*[0-9]+\s*,\s*"[0-9A-Z+/]+"\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*/i);
+
+        if(!parameters) {
+            console.error("No parameters found in the file.");
+            return;
+        }
+
+        // console.log(parameters[0])
+        // Output: "npJuJeguJeDuJnJuJeguJeBunptuneDuJeBuJegunpguppupnunBpunptuJeBuJeBuJeguneBugpunDguJeguJnnuJeBunpBupeupnuneeu",55,"enJBtDgpu",23,8,20
+
+        parameters = parameters[0].split(/\s*,\s*/);
+
+        // wtf i tried GitHub Copilot and it immediately wrote this block,
+        // skipping the dead parameters like [1] and [5] and picking only the useful ones.
+        // Honestly, I didn’t expect that to work.
+        obfuscatedStr = parameters[0].replace(/"/g, ""); // Remove quotes
+        const alphabet = parameters[2].replace(/"/g, ""); // Remove quotes
+        const offset = parseInt(parameters[3], 10);
+        const base = parseInt(parameters[4], 10);
+
+        argv.v && console.log(`Deobfuscating with parameters:\nObfuscated String: \x1b[32m"${obfuscatedStr}"\x1b[0m\nAlphabet: \x1b[32m"${alphabet}"\x1b[0m\nOffset: \x1b[33m${offset}\x1b[0m\nBase: \x1b[33m${base}\x1b[0m`);
+
+        // console.log(decode(obfuscatedStr, alphabet, offset, base));
+        // Output: console.log("Hello, World!")
+
+        const result = decode(obfuscatedStr, alphabet, offset, base);
+
+        if(argv.o) {
+            fs.writeFile(argv.o, result, (err) => {
+                if (err) {
+                    console.error("Error writing to file:", err);
+                } else {
+                    console.log(`Deobfuscated code written to ${argv.o}`);
+                }
+            });
+        } else {
+            console.log(argv.colors != false ? highlight(result, { language: 'javascript', theme: theme}) : result)
+        }
+            
+    })
+}
+
 /*
     var _0xc5e = ["", "split", "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/", "slice", "indexOf", "", "", ".", "pow", "reduce", "reverse", "0"];
 
@@ -70,37 +166,3 @@ function decode(obfuscatedStr, alphabet, offset, base) {
 
 // console.log(decode("npJuJeguJeDuJnJuJeguJeBunptuneDuJeBuJegunpguppupnunBpunptuJeBuJeBuJeguneBugpunDguJeguJnnuJeBunpBupeupnuneeu", "enJBtDgpu", 23, 8));
 // Output: console.log("Hello, World!")
-
-const fs = require("fs");
-const file = "obfuscated.js";
-
-fs.readFile(file, "utf8", (err, data) => {
-    if (err) {
-        console.error("Error reading file:", err);
-        return;
-    }
-
-    /* A simple regular expression to retrieve the values ​​as parameters of the decoding function */
-    var parameters = data.match(/\s*"[0-9A-Z+/]+"\s*,\s*[0-9]+\s*,\s*"[0-9A-Z+/]+"\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*/i);
-    
-    if(!parameters) {
-        console.error("No parameters found in the file.");
-        return;
-    }
-
-    // console.log(parameters[0])
-    // Output: "npJuJeguJeDuJnJuJeguJeBunptuneDuJeBuJegunpguppupnunBpunptuJeBuJeBuJeguneBugpunDguJeguJnnuJeBunpBupeupnuneeu",55,"enJBtDgpu",23,8,20
-
-    parameters = parameters[0].split(/\s*,\s*/);
-
-    // wtf i tried GitHub Copilot and it immediately wrote this block,
-    // skipping the dead parameters like [1] and [5] and picking only the useful ones.
-    // Honestly, I didn’t expect that to work.
-    obfuscatedStr = parameters[0].replace(/"/g, ""); // Remove quotes
-    const alphabet = parameters[2].replace(/"/g, ""); // Remove quotes
-    const offset = parseInt(parameters[3], 10);
-    const base = parseInt(parameters[4], 10);
-
-    console.log(decode(obfuscatedStr, alphabet, offset, base));
-    // Output: console.log("Hello, World!")
-})
