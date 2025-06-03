@@ -71,3 +71,23 @@ function decode(obfuscatedStr, alphabet, offset, base) {
 // console.log(decode("npJuJeguJeDuJnJuJeguJeBunptuneDuJeBuJegunpguppupnunBpunptuJeBuJeBuJeguneBugpunDguJeguJnnuJeBunpBupeupnuneeu", "enJBtDgpu", 23, 8));
 // Output: console.log("Hello, World!")
 
+const fs = require("fs");
+const file = "obfuscated.js";
+
+fs.readFile(file, "utf8", (err, data) => {
+    if (err) {
+        console.error("Error reading file:", err);
+        return;
+    }
+
+    /* A simple regular expression to retrieve the values ​​as parameters of the decoding function */
+    const parameters = data.match(/\s*"[0-9A-Z+/]+"\s*,\s*[0-9]+\s*,\s*"[0-9A-Z+/]+"\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*/i);
+    
+    if(!parameters) {
+        console.error("No parameters found in the file.");
+        return;
+    }
+
+    console.log(parameters[0])
+    // Output: "npJuJeguJeDuJnJuJeguJeBunptuneDuJeBuJegunpguppupnunBpunptuJeBuJeBuJeguneBugpunDguJeguJnnuJeBunpBupeupnuneeu",55,"enJBtDgpu",23,8,20
+})
