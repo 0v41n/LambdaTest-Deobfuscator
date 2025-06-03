@@ -6,14 +6,14 @@
         var h = g[_0xc5e[3]](0, e);
         var i = g[_0xc5e[3]](0, f);
         var j = d[_0xc5e[1]](_0xc5e[0])[_0xc5e[10]]()[_0xc5e[9]](function (a, b, c) {
-            if (h[_0xc5e[4]](b) !== -1) return a += h[_0xc5e[4]](b) * (Math[_0xc5e[8]](e, c))
+            if (h[_0xc5e[4]](b) !== -1) return a += h[_0xc5e[4]](b) * (Math[_0xc5e[8]](e, c));
         }, 0);
         var k = _0xc5e[0];
-        while (j > 0) {
+        while (j > 0) { // I removed it because it was useless. All the samples I had were in decimal directly :3
             k = i[j % f] + k;
-            j = (j - (j % f)) / f
+            j = (j - (j % f)) / f;
         }
-        return k || _0xc5e[11]
+        return k || _0xc5e[11];
     }
 */
 function convertBaseToDecimal(inputStr, baseFrom) {
