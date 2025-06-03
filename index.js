@@ -81,13 +81,26 @@ fs.readFile(file, "utf8", (err, data) => {
     }
 
     /* A simple regular expression to retrieve the values ​​as parameters of the decoding function */
-    const parameters = data.match(/\s*"[0-9A-Z+/]+"\s*,\s*[0-9]+\s*,\s*"[0-9A-Z+/]+"\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*/i);
+    var parameters = data.match(/\s*"[0-9A-Z+/]+"\s*,\s*[0-9]+\s*,\s*"[0-9A-Z+/]+"\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*/i);
     
     if(!parameters) {
         console.error("No parameters found in the file.");
         return;
     }
 
-    console.log(parameters[0])
+    // console.log(parameters[0])
     // Output: "npJuJeguJeDuJnJuJeguJeBunptuneDuJeBuJegunpguppupnunBpunptuJeBuJeBuJeguneBugpunDguJeguJnnuJeBunpBupeupnuneeu",55,"enJBtDgpu",23,8,20
+
+    parameters = parameters[0].split(/\s*,\s*/);
+
+    // wtf i tried GitHub Copilot and it immediately wrote this block,
+    // skipping the dead parameters like [1] and [5] and picking only the useful ones.
+    // Honestly, I didn’t expect that to work.
+    obfuscatedStr = parameters[0].replace(/"/g, ""); // Remove quotes
+    const alphabet = parameters[2].replace(/"/g, ""); // Remove quotes
+    const offset = parseInt(parameters[3], 10);
+    const base = parseInt(parameters[4], 10);
+
+    console.log(decode(obfuscatedStr, alphabet, offset, base));
+    // Output: console.log("Hello, World!")
 })
